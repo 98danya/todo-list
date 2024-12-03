@@ -73,66 +73,90 @@ export const domController = (() => {
 
     };
 
-    const renderTodoForm = (onSubmit) => {
+    const renderTodoForm = (onSubmit, todo = {}) => { 
         divContent.innerHTML = "";
-
+    
         const form = document.createElement("form");
-
+    
         const nameInput = document.createElement("input");
         nameInput.placeholder = "Todo Name";
         nameInput.required = true;
-
+        nameInput.value = todo.name || ""; 
+    
         const descriptionInput = document.createElement("input");
         descriptionInput.placeholder = "Description";
-
+        descriptionInput.value = todo.description || "";
+    
         const dueDateInput = document.createElement("input");
         dueDateInput.type = "date";
-
-        const priorityInput = document.createElement("input");
-        priorityInput.type = "number";
-        priorityInput.placeholder = "Priority (1-5)";
-        priorityInput.min = 1;
-        priorityInput.max = 5;
-
+        dueDateInput.value = todo.dueDate || ""; 
+    
+        const prioritySelect = document.createElement("select"); 
+        const priorityOptions = ["High", "Medium", "Low"];
+        priorityOptions.forEach((priority) => {
+            const option = document.createElement("option");
+            option.value = priority;
+            option.textContent = priority;
+            if (todo.priority === priority) {
+                option.selected = true; 
+            }
+            prioritySelect.appendChild(option);
+        });
+    
         const submitButton = document.createElement("button");
-        submitButton.textContent = "Create Todo";
+        submitButton.textContent = "Save Todo";
         submitButton.type = "submit";
-
+    
         form.appendChild(nameInput);
         form.appendChild(descriptionInput);
         form.appendChild(dueDateInput);
-        form.appendChild(priorityInput);
+        form.appendChild(prioritySelect);
         form.appendChild(submitButton);
-
+    
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             const name = nameInput.value.trim();
             const description = descriptionInput.value.trim();
             const dueDate = dueDateInput.value;
-            const priority = parseInt(priorityInput.value, 10) || 1;
+            const priority = prioritySelect.value;
     
             if (name) {
                 onSubmit(name, description, dueDate, priority);
             }
-
-    });
-
-    divContent.appendChild(form);
-};
+        });
+    
+        divContent.appendChild(form);
+    };
 
     const renderTodos = (todos, project, projects) => {
-        divContent.innerHTML = `<h11>${project.name}</h1>`;
-
+        divContent.innerHTML = `<h1>${project.name}</h1>`;
+    
         todos.forEach((todo) => {
             const todoElement = document.createElement("div");
             todoElement.textContent = todo.name;
-
-            todoElement.addEventListener("click", () => {
-                renderTodo(todo);
+    
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.addEventListener("click", () => {
+                renderTodoForm(
+                    (name, description, dueDate, priority) => {
+                        todo.name = name;
+                        todo.description = description;
+                        todo.dueDate = dueDate;
+                        todo.priority = priority;
+    
+                        storageManager.saveData(projects);
+    
+                        renderTodos(project.todoList, project, projects);
+                    },
+                    todo
+                );
             });
+    
+            todoElement.appendChild(editButton);
             divContent.appendChild(todoElement);
         });
-
+    
         const addTodoButton = document.createElement("button");
         addTodoButton.textContent = "Add Todo";
         addTodoButton.addEventListener("click", () => {
@@ -143,17 +167,16 @@ export const domController = (() => {
                 renderTodos(project.todoList, project, projects);
             });
         });
-
+    
         divContent.appendChild(addTodoButton);
-
+    
         const backButton = document.createElement("button");
         backButton.textContent = "Back to Projects";
         backButton.addEventListener("click", () => {
             renderProjects(projects, () => {});
         });
-        
+    
         divContent.appendChild(backButton);
-
     };
 
     return {
