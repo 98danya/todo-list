@@ -7,6 +7,7 @@ export const domController = (() => {
 
     divContent.innerHTML = "";
 
+
     const renderProjectForm = (onSubmit) => {
         const form = document.createElement("form");
 
@@ -36,6 +37,7 @@ export const domController = (() => {
 
         divContent.appendChild(form);
     };
+
 
     const renderProjects = (projects) => {
         divContent.innerHTML = "";
@@ -72,6 +74,7 @@ export const domController = (() => {
         divContent.appendChild(addProjectButton);
 
     };
+
 
     const renderTodoForm = (onSubmit, todo = {}) => { 
         divContent.innerHTML = "";
@@ -128,38 +131,53 @@ export const domController = (() => {
         divContent.appendChild(form);
     };
 
-    const renderTodos = (todos, project, projects) => {
-        divContent.innerHTML = `<h1>${project.name}</h1>`;
-    
-        todos.forEach((todo) => {
-            const todoElement = document.createElement("div");
-            todoElement.textContent = todo.name;
-    
-            const editButton = document.createElement("button");
-            editButton.textContent = "Edit";
-            editButton.addEventListener("click", () => {
-                renderTodoForm(
-                    (name, description, dueDate, priority) => {
-                        todo.updateTodo({
-                            name,
-                            description,
-                            dueDate,
-                            priority
-                        });
-            
-                        storageManager.saveData(projects);
-                        renderTodos(project.todoList, project, projects);
-                    },
-                    todo
-                );
-            });
-    
-            todoElement.appendChild(editButton);
 
-            
-            divContent.appendChild(todoElement);
+    const renderTodos = (todos, project, projects) => {
+    divContent.innerHTML = `<h1>${project.name}</h1>`;
+    
+    todos.forEach((todo) => {
+        const todoElement = document.createElement("div");
+        todoElement.textContent = todo.name;
+    
+        const editButton = document.createElement("button");
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => {
+            renderTodoForm(
+                (name, description, dueDate, priority) => {
+                    todo.updateTodo({
+                        name,
+                        description,
+                        dueDate,
+                        priority
+                    });
+        
+                    storageManager.saveData(projects);                        
+                    renderTodos(project.todoList, project, projects);
+                },
+                todo
+            );
         });
     
+        todoElement.appendChild(editButton);
+
+        const deleteTodo = document.createElement("input");
+        deleteTodo.type = "checkbox";
+        deleteTodo.title = "Check to remove";
+        deleteTodo.addEventListener("change", () => {
+            if (deleteTodo.checked) {
+                project.todoList.splice(project.todoList.indexOf(todo), 1);
+
+                storageManager.saveData(projects);
+
+                renderTodos(project.todoList, project, projects);
+            }
+        });
+
+        todoElement.appendChild(deleteTodo);
+
+        divContent.appendChild(todoElement);
+    }); 
+        
         const addTodoButton = document.createElement("button");
         addTodoButton.textContent = "Add Todo";
         addTodoButton.addEventListener("click", () => {
