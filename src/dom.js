@@ -140,13 +140,14 @@ export const domController = (() => {
             editButton.addEventListener("click", () => {
                 renderTodoForm(
                     (name, description, dueDate, priority) => {
-                        todo.name = name;
-                        todo.description = description;
-                        todo.dueDate = dueDate;
-                        todo.priority = priority;
-    
+                        todo.updateTodo({
+                            name,
+                            description,
+                            dueDate,
+                            priority
+                        });
+            
                         storageManager.saveData(projects);
-    
                         renderTodos(project.todoList, project, projects);
                     },
                     todo
@@ -154,6 +155,8 @@ export const domController = (() => {
             });
     
             todoElement.appendChild(editButton);
+
+            
             divContent.appendChild(todoElement);
         });
     

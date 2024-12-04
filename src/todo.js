@@ -13,8 +13,6 @@ export function todoItem(name, description, dueDate, priority) {
         if (details.description) description = details.description;
         if (details.dueDate) dueDate = parseISO(details.dueDate);
         if (details.priority) priority = details.priority;
-
-        console.log(`Todo "${name}" updated`);
     };
 
     const getDateAsString = () => {
