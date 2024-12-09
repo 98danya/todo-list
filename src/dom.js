@@ -44,22 +44,11 @@ export const domController = (() => {
     projectContainer.classList.add("project-container");
 
     const header = document.createElement("h1");
-    header.textContent = "Projects";
+    header.textContent = "🖇️ Projects";
     projectContainer.appendChild(header);
 
-    projects.forEach((project) => {
-      const projectElement = document.createElement("div");
-      projectElement.textContent = project.name;
-
-      projectElement.addEventListener("click", () => {
-        renderProjects(projects, project); 
-      });
-
-      projectContainer.appendChild(projectElement);
-    });
-
     const addProjectButton = document.createElement("button");
-    addProjectButton.textContent = "Add New Project";
+    addProjectButton.textContent = "+";
     addProjectButton.addEventListener("click", () => {
       renderProjectForm((name, description) => {
         const newProject = projectItem(name, description);
@@ -72,6 +61,18 @@ export const domController = (() => {
     });
 
     projectContainer.appendChild(addProjectButton);
+
+    projects.forEach((project) => {
+      const projectElement = document.createElement("div");
+      projectElement.classList.add("project-element");
+      projectElement.textContent = project.name;
+
+      projectElement.addEventListener("click", () => {
+        renderProjects(projects, project);
+      });
+
+      projectContainer.appendChild(projectElement);
+    });
 
     if (selectedProject) {
       renderTodos(selectedProject.todoList, selectedProject, projects);
@@ -122,21 +123,21 @@ export const domController = (() => {
     cancelButton.type = "button";
 
     form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const name = nameInput.value.trim();
-        const description = descriptionInput.value.trim();
-        const dueDate = dueDateInput.value;
-        const priority = prioritySelect.value;
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const description = descriptionInput.value.trim();
+      const dueDate = dueDateInput.value;
+      const priority = prioritySelect.value;
 
-        if (name) {
-            onSubmit(name, description, dueDate, priority); 
-            renderTodos(project.todoList, project, projects); 
-        }
-        formContainer.remove(); 
+      if (name) {
+        onSubmit(name, description, dueDate, priority);
+        renderTodos(project.todoList, project, projects);
+      }
+      formContainer.remove();
     });
 
     cancelButton.addEventListener("click", () => {
-        formContainer.remove();
+      formContainer.remove();
     });
 
     form.appendChild(nameInput);
@@ -166,7 +167,7 @@ export const domController = (() => {
       todoElement.classList.add("todo-element");
 
       const todoName = document.createElement("h4");
-      todoName.textContent = todo.name; 
+      todoName.textContent = todo.name;
       todoElement.appendChild(todoName);
 
       const todoDescription = document.createElement("p");
@@ -184,19 +185,20 @@ export const domController = (() => {
       const editButton = document.createElement("button");
       editButton.textContent = "Edit";
       editButton.addEventListener("click", () => {
-        renderTodoForm((name, description, dueDate, priority) => {
-          todo.updateTodo({
-            name,
-            description,
-            dueDate,
-            priority,
-          });
+        renderTodoForm(
+          (name, description, dueDate, priority) => {
+            todo.updateTodo({
+              name,
+              description,
+              dueDate,
+              priority,
+            });
 
-          storageManager.saveData(projects); 
-            renderTodos(project.todoList, project, projects); 
+            storageManager.saveData(projects);
+            renderTodos(project.todoList, project, projects);
           },
           todo,
-          projects, 
+          projects,
           project
         );
       });
