@@ -60,8 +60,6 @@ export const domController = (() => {
         addProjectButton.textContent = "Add New Project";
         addProjectButton.addEventListener("click", () => {
             renderProjectForm((name, description) => {
-                console.log(`New project: ${name}, Description: ${description}`);
-
                 const newProject = projectItem(name, description);
                 projects.push(newProject);
 

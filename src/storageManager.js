@@ -12,7 +12,6 @@ export const storageManager = (() => {
                 description: todo.description,
                 dueDate: todo.dueDate,
                 priority: todo.priority,
-                completed: todo.completed,
             })),
         }));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
@@ -33,7 +32,6 @@ export const storageManager = (() => {
                 if (Array.isArray(projectData.todoList)){
                     projectData.todoList.forEach(todoData => {
                         const todo = todoItem(todoData.name, todoData.description, todoData.dueDate, todoData.priority);
-                        todo.completed = todoData.completed;
                         project.addTodo(todo);
                     });
                 }

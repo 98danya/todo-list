@@ -1,12 +1,6 @@
 import { format, parseISO } from 'date-fns';
 
 export function todoItem(name, description, dueDate, priority) {
-    let completed = false;
-
-    const toggleComplete = () => {
-        completed = !completed;
-        console.log(`Todo "${name}" toggled to ${completed ? "complete" : "incomplete"}`);
-    };
 
     const updateTodo = (details) => {
         if (details.name) name = details.name;
@@ -57,7 +51,6 @@ export function todoItem(name, description, dueDate, priority) {
             completed = value;
         },
         updateTodo,
-        toggleComplete,
         getDateAsString,
         getDateAsInputFormat
     };
