@@ -39,7 +39,7 @@ export const domController = (() => {
     };
 
 
-    const renderProjects = (projects) => {
+    const renderProjects = (projects, selectedProject = null) => {
         divContent.innerHTML = "";
 
         const header = document.createElement("h1");
@@ -51,8 +51,9 @@ export const domController = (() => {
             projectElement.textContent = project.name;
 
             projectElement.addEventListener("click", () => {
-                renderTodos(project.todoList, project, projects);
+                renderProjects(projects, project); // Re-render with the clicked project selected
             });
+    
             divContent.appendChild(projectElement);
         });
 
@@ -65,11 +66,15 @@ export const domController = (() => {
 
                 storageManager.saveData(projects);
 
-                renderProjects(projects);
+                renderProjects(projects, newProject);
             });
         });
 
         divContent.appendChild(addProjectButton);
+
+        if (selectedProject) {
+            renderTodos(selectedProject.todoList, selectedProject, projects);
+        }
 
     };
 
@@ -131,7 +136,8 @@ export const domController = (() => {
 
 
     const renderTodos = (todos, project, projects) => {
-    divContent.innerHTML = `<h1>${project.name}</h1>`;
+        const todosContainer = document.createElement("div");
+    todosContainer.innerHTML = `<h2>${project.name}</h2>`;
     
     todos.forEach((todo) => {
         const todoElement = document.createElement("div");
@@ -150,7 +156,7 @@ export const domController = (() => {
                     });
         
                     storageManager.saveData(projects);                        
-                    renderTodos(project.todoList, project, projects);
+                    renderTodos(projects, project);
                 },
                 todo
             );
@@ -167,13 +173,13 @@ export const domController = (() => {
 
                 storageManager.saveData(projects);
 
-                renderTodos(project.todoList, project, projects);
+                renderTodos(projects, project);
             }
         });
 
         todoElement.appendChild(deleteTodo);
 
-        divContent.appendChild(todoElement);
+        todosContainer.appendChild(todoElement);
     }); 
         
         const addTodoButton = document.createElement("button");
@@ -183,19 +189,23 @@ export const domController = (() => {
                 const newTodo = todoItem(name, description, dueDate, priority);
                 project.addTodo(newTodo);
                 storageManager.saveData(projects);
-                renderTodos(project.todoList, project, projects);
+                renderTodos(projects, project);
             });
         });
     
-        divContent.appendChild(addTodoButton);
+        todosContainer.appendChild(addTodoButton);
     
-        const backButton = document.createElement("button");
+       /* 
+       const backButton = document.createElement("button");
         backButton.textContent = "Back to Projects";
         backButton.addEventListener("click", () => {
             renderProjects(projects, () => {});
         });
     
         divContent.appendChild(backButton);
+        */
+
+        divContent.appendChild(todosContainer);
     };
 
     return {

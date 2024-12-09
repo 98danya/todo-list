@@ -8,12 +8,18 @@ import { todoItem } from './todo';
 let projects = storageManager.loadData() || [];
 
 window.onload = () => {
-    domController.renderProjects(projects, (name, description) => {
-        const newProject = projectItem(name, description);
-        projects.push(newProject); 
-        storageManager.saveData(projects); 
-        domController.renderProjects(projects, () => {}); 
-    });
+    if (projects.length === 0) {
+        const defaultProject = projectItem("Week 1", "Things that need to get done…");
+        const todo1 = todoItem("Finish Application", "Finish the TODO-Application", "2024-12-10", "High");
+        const todo2 = todoItem("Revision", "Revise Factory Functions ", "2024-12-28", "Medium");
+
+        defaultProject.todoList.push(todo1);
+        defaultProject.todoList.push(todo2);
+        projects.push(defaultProject);
+
+        storageManager.saveData(projects);
+    }
+    domController.renderProjects(projects, projects[0]);
 };
 
 window.addEventListener("beforeunload", () => {
@@ -21,6 +27,7 @@ window.addEventListener("beforeunload", () => {
     localStorage.clear();
 });
 
+/*
 let defaultProject = new projectItem("Week 1", "Things that need to get done…");
 projects.push(defaultProject);
 
@@ -29,3 +36,4 @@ let todo2 = new todoItem("Revision", "Revise Factory Functions ", "2024/12/28", 
 
 defaultProject.todoList.push(todo1);
 defaultProject.todoList.push(todo2);
+*/
