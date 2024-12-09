@@ -80,7 +80,7 @@ export const domController = (() => {
     divContent.appendChild(projectContainer);
   };
 
-  const renderTodoForm = (onSubmit, todo = {}) => {
+  const renderTodoForm = (onSubmit, todo = {}, projects, project) => {
     const formContainer = document.createElement("div");
     formContainer.classList.add("todo-form-container");
 
@@ -129,9 +129,10 @@ export const domController = (() => {
         const priority = prioritySelect.value;
 
         if (name) {
-            onSubmit(name, description, dueDate, priority);
+            onSubmit(name, description, dueDate, priority); 
+            renderTodos(project.todoList, project, projects); 
         }
-        formContainer.remove();
+        formContainer.remove(); 
     });
 
     cancelButton.addEventListener("click", () => {
@@ -158,11 +159,27 @@ export const domController = (() => {
       divContent.appendChild(todosContainer);
     }
 
-    todosContainer.innerHTML = `<h2>${project.name}</h2>`;
+    todosContainer.innerHTML = `<h2>${project.name} <br> <h3>${project.description}</h3></h2>`;
 
     todos.forEach((todo) => {
       const todoElement = document.createElement("div");
-      todoElement.textContent = todo.name;
+      todoElement.classList.add("todo-element");
+
+      const todoName = document.createElement("h4");
+      todoName.textContent = todo.name; 
+      todoElement.appendChild(todoName);
+
+      const todoDescription = document.createElement("p");
+      todoDescription.textContent = `${todo.description}`;
+      todoElement.appendChild(todoDescription);
+
+      const todoDueDate = document.createElement("p");
+      todoDueDate.textContent = `Due Date: ${todo.dueDate}`;
+      todoElement.appendChild(todoDueDate);
+
+      const todoPriority = document.createElement("p");
+      todoPriority.textContent = `Priority: ${todo.priority}`;
+      todoElement.appendChild(todoPriority);
 
       const editButton = document.createElement("button");
       editButton.textContent = "Edit";
@@ -175,9 +192,13 @@ export const domController = (() => {
             priority,
           });
 
-          storageManager.saveData(projects);
-          renderTodos(projects, project);
-        }, todo);
+          storageManager.saveData(projects); 
+            renderTodos(project.todoList, project, projects); 
+          },
+          todo,
+          projects, 
+          project
+        );
       });
 
       todoElement.appendChild(editButton);
@@ -214,7 +235,8 @@ export const domController = (() => {
           renderTodos(project.todoList, project, projects);
         },
         null,
-        todosContainer
+        projects,
+        project
       );
     });
 
