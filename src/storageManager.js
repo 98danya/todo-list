@@ -21,25 +21,24 @@ export const storageManager = (() => {
         const data = localStorage.getItem(STORAGE_KEY);
         try {
             if (!data) return [];
-
+    
             const parsedData = JSON.parse(data);
-
+    
             if (!Array.isArray(parsedData)) return [];
-
+    
             const projects = parsedData.map(projectData => {
                 const project = projectItem(projectData.name, projectData.description);
-
-                if (Array.isArray(projectData.todoList)){
-                    projectData.todoList.forEach(todoData => {
-                        const todo = todoItem(todoData.name, todoData.description, todoData.dueDate, todoData.priority);
-                        project.addTodo(todo);
-                    });
-                }
+    
+                const todoList = Array.isArray(projectData.todoList) ? projectData.todoList : [];
+                todoList.forEach(todoData => {
+                    const todo = todoItem(todoData.name, todoData.description, todoData.dueDate, todoData.priority);
+                    project.addTodo(todo);
+                });
+    
                 return project;
             });
-
-            return projects
-            
+    
+            return projects;
         } catch (e) {
             console.error('Error parsing localStorage data:', e);
             return [];

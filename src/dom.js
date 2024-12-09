@@ -3,216 +3,230 @@ import { storageManager } from "./storageManager.js";
 import { todoItem } from "./todo";
 
 export const domController = (() => {
-    const divContent = document.getElementById("content");
+  const divContent = document.getElementById("content");
 
+  divContent.innerHTML = "";
+
+  const renderProjectForm = (onSubmit) => {
+    const form = document.createElement("form");
+
+    const nameInput = document.createElement("input");
+    nameInput.placeholder = "Project Name";
+    nameInput.required = true;
+
+    const descriptionInput = document.createElement("input");
+    descriptionInput.placeholder = "Description";
+
+    const submitButton = document.createElement("button");
+    submitButton.textContent = "Create Project";
+    submitButton.type = "submit";
+
+    form.appendChild(nameInput);
+    form.appendChild(descriptionInput);
+    form.appendChild(submitButton);
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const description = descriptionInput.value.trim();
+      if (name) {
+        onSubmit(name, description);
+      }
+    });
+
+    divContent.appendChild(form);
+  };
+
+  const renderProjects = (projects, selectedProject = null) => {
     divContent.innerHTML = "";
 
+    const projectContainer = document.createElement("nav");
+    projectContainer.classList.add("project-container");
 
-    const renderProjectForm = (onSubmit) => {
-        const form = document.createElement("form");
+    const header = document.createElement("h1");
+    header.textContent = "Projects";
+    projectContainer.appendChild(header);
 
-        const nameInput = document.createElement("input");
-        nameInput.placeholder = "Project Name";
-        nameInput.required = true;
+    projects.forEach((project) => {
+      const projectElement = document.createElement("div");
+      projectElement.textContent = project.name;
 
-        const descriptionInput = document.createElement("input");
-        descriptionInput.placeholder = "Description";
+      projectElement.addEventListener("click", () => {
+        renderProjects(projects, project); 
+      });
 
-        const submitButton = document.createElement("button");
-        submitButton.textContent = "Create Project";
-        submitButton.type = "submit";
+      projectContainer.appendChild(projectElement);
+    });
 
-        form.appendChild(nameInput);
-        form.appendChild(descriptionInput);
-        form.appendChild(submitButton);
+    const addProjectButton = document.createElement("button");
+    addProjectButton.textContent = "Add New Project";
+    addProjectButton.addEventListener("click", () => {
+      renderProjectForm((name, description) => {
+        const newProject = projectItem(name, description);
+        projects.push(newProject);
 
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const name = nameInput.value.trim();
-            const description = descriptionInput.value.trim();
-            if (name) {
-                onSubmit(name, description);
-            }
-        });
+        storageManager.saveData(projects);
 
-        divContent.appendChild(form);
-    };
+        renderProjects(projects, newProject);
+      });
+    });
 
+    projectContainer.appendChild(addProjectButton);
 
-    const renderProjects = (projects, selectedProject = null) => {
-        divContent.innerHTML = "";
+    if (selectedProject) {
+      renderTodos(selectedProject.todoList, selectedProject, projects);
+    }
 
-        const header = document.createElement("h1");
-        header.textContent = "Projects";
-        divContent.appendChild(header);
+    divContent.appendChild(projectContainer);
+  };
 
-        projects.forEach((project) => {
-            const projectElement = document.createElement("div");
-            projectElement.textContent = project.name;
+  const renderTodoForm = (onSubmit, todo = {}) => {
+    const formContainer = document.createElement("div");
+    formContainer.classList.add("todo-form-container");
 
-            projectElement.addEventListener("click", () => {
-                renderProjects(projects, project); // Re-render with the clicked project selected
-            });
-    
-            divContent.appendChild(projectElement);
-        });
+    const form = document.createElement("form");
 
-        const addProjectButton = document.createElement("button");
-        addProjectButton.textContent = "Add New Project";
-        addProjectButton.addEventListener("click", () => {
-            renderProjectForm((name, description) => {
-                const newProject = projectItem(name, description);
-                projects.push(newProject);
+    const nameInput = document.createElement("input");
+    nameInput.placeholder = "Todo Name";
+    nameInput.required = true;
+    nameInput.value = todo && todo.name ? todo.name : "";
 
-                storageManager.saveData(projects);
+    const descriptionInput = document.createElement("input");
+    descriptionInput.placeholder = "Description";
+    descriptionInput.value = todo && todo.description ? todo.description : "";
 
-                renderProjects(projects, newProject);
-            });
-        });
+    const dueDateInput = document.createElement("input");
+    dueDateInput.type = "date";
+    dueDateInput.value = todo && todo.dueDate ? todo.dueDate : "";
 
-        divContent.appendChild(addProjectButton);
+    const prioritySelect = document.createElement("select");
+    const priorityOptions = ["High", "Medium", "Low"];
+    const priority = todo && todo.priority ? todo.priority : "High";
 
-        if (selectedProject) {
-            renderTodos(selectedProject.todoList, selectedProject, projects);
+    priorityOptions.forEach((priorityOption) => {
+      const option = document.createElement("option");
+      option.value = priorityOption;
+      option.textContent = priorityOption;
+      if (priority === priorityOption) {
+        option.selected = true;
+      }
+      prioritySelect.appendChild(option);
+    });
+
+    const submitButton = document.createElement("button");
+    submitButton.textContent = "Save Todo";
+    submitButton.type = "submit";
+
+    const cancelButton = document.createElement("button");
+    cancelButton.textContent = "Cancel";
+    cancelButton.type = "button";
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = nameInput.value.trim();
+        const description = descriptionInput.value.trim();
+        const dueDate = dueDateInput.value;
+        const priority = prioritySelect.value;
+
+        if (name) {
+            onSubmit(name, description, dueDate, priority);
         }
+        formContainer.remove();
+    });
 
-    };
+    cancelButton.addEventListener("click", () => {
+        formContainer.remove();
+    });
 
+    form.appendChild(nameInput);
+    form.appendChild(descriptionInput);
+    form.appendChild(dueDateInput);
+    form.appendChild(prioritySelect);
+    form.appendChild(submitButton);
+    form.appendChild(cancelButton);
 
-    const renderTodoForm = (onSubmit, todo = {}) => { 
-        divContent.innerHTML = "";
-    
-        const form = document.createElement("form");
-    
-        const nameInput = document.createElement("input");
-        nameInput.placeholder = "Todo Name";
-        nameInput.required = true;
-        nameInput.value = todo.name || ""; 
-    
-        const descriptionInput = document.createElement("input");
-        descriptionInput.placeholder = "Description";
-        descriptionInput.value = todo.description || "";
-    
-        const dueDateInput = document.createElement("input");
-        dueDateInput.type = "date";
-        dueDateInput.value = todo.dueDate || ""; 
-    
-        const prioritySelect = document.createElement("select"); 
-        const priorityOptions = ["High", "Medium", "Low"];
-        priorityOptions.forEach((priority) => {
-            const option = document.createElement("option");
-            option.value = priority;
-            option.textContent = priority;
-            if (todo.priority === priority) {
-                option.selected = true; 
-            }
-            prioritySelect.appendChild(option);
-        });
-    
-        const submitButton = document.createElement("button");
-        submitButton.textContent = "Save Todo";
-        submitButton.type = "submit";
-    
-        form.appendChild(nameInput);
-        form.appendChild(descriptionInput);
-        form.appendChild(dueDateInput);
-        form.appendChild(prioritySelect);
-        form.appendChild(submitButton);
-    
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const name = nameInput.value.trim();
-            const description = descriptionInput.value.trim();
-            const dueDate = dueDateInput.value;
-            const priority = prioritySelect.value;
-    
-            if (name) {
-                onSubmit(name, description, dueDate, priority);
-            }
-        });
-    
-        divContent.appendChild(form);
-    };
+    formContainer.appendChild(form);
+    divContent.appendChild(formContainer);
+  };
 
+  const renderTodos = (todos, project, projects) => {
+    let todosContainer = document.querySelector(".todo-container");
 
-    const renderTodos = (todos, project, projects) => {
-        const todosContainer = document.createElement("div");
+    if (!todosContainer) {
+      todosContainer = document.createElement("div");
+      todosContainer.classList.add("todo-container");
+      divContent.appendChild(todosContainer);
+    }
+
     todosContainer.innerHTML = `<h2>${project.name}</h2>`;
-    
+
     todos.forEach((todo) => {
-        const todoElement = document.createElement("div");
-        todoElement.textContent = todo.name;
-    
-        const editButton = document.createElement("button");
-        editButton.textContent = "Edit";
-        editButton.addEventListener("click", () => {
-            renderTodoForm(
-                (name, description, dueDate, priority) => {
-                    todo.updateTodo({
-                        name,
-                        description,
-                        dueDate,
-                        priority
-                    });
-        
-                    storageManager.saveData(projects);                        
-                    renderTodos(projects, project);
-                },
-                todo
-            );
-        });
-    
-        todoElement.appendChild(editButton);
+      const todoElement = document.createElement("div");
+      todoElement.textContent = todo.name;
 
-        const deleteTodo = document.createElement("input");
-        deleteTodo.type = "checkbox";
-        deleteTodo.title = "Check to remove";
-        deleteTodo.addEventListener("change", () => {
-            if (deleteTodo.checked) {
-                project.todoList.splice(project.todoList.indexOf(todo), 1);
+      const editButton = document.createElement("button");
+      editButton.textContent = "Edit";
+      editButton.addEventListener("click", () => {
+        renderTodoForm((name, description, dueDate, priority) => {
+          todo.updateTodo({
+            name,
+            description,
+            dueDate,
+            priority,
+          });
 
-                storageManager.saveData(projects);
+          storageManager.saveData(projects);
+          renderTodos(projects, project);
+        }, todo);
+      });
 
-                renderTodos(projects, project);
-            }
-        });
+      todoElement.appendChild(editButton);
 
-        todoElement.appendChild(deleteTodo);
+      const deleteTodo = document.createElement("input");
+      deleteTodo.type = "checkbox";
+      deleteTodo.title = "Check to remove";
+      deleteTodo.addEventListener("change", () => {
+        if (deleteTodo.checked) {
+          const index = project.todoList.indexOf(todo);
+          if (index !== -1) {
+            project.todoList.splice(index, 1);
+          }
 
-        todosContainer.appendChild(todoElement);
-    }); 
-        
-        const addTodoButton = document.createElement("button");
-        addTodoButton.textContent = "Add Todo";
-        addTodoButton.addEventListener("click", () => {
-            renderTodoForm((name, description, dueDate, priority) => {
-                const newTodo = todoItem(name, description, dueDate, priority);
-                project.addTodo(newTodo);
-                storageManager.saveData(projects);
-                renderTodos(projects, project);
-            });
-        });
-    
-        todosContainer.appendChild(addTodoButton);
-    
-       /* 
-       const backButton = document.createElement("button");
-        backButton.textContent = "Back to Projects";
-        backButton.addEventListener("click", () => {
-            renderProjects(projects, () => {});
-        });
-    
-        divContent.appendChild(backButton);
-        */
+          storageManager.saveData(projects);
 
-        divContent.appendChild(todosContainer);
-    };
+          renderTodos(project.todoList, project, projects);
+        }
+      });
 
-    return {
-        renderProjectForm,
-        renderProjects,
-        renderTodoForm,
-        renderTodos
-    };
+      todoElement.appendChild(deleteTodo);
 
+      todosContainer.appendChild(todoElement);
+    });
+
+    const addTodoButton = document.createElement("button");
+    addTodoButton.textContent = "Add Todo";
+    addTodoButton.addEventListener("click", () => {
+      renderTodoForm(
+        (name, description, dueDate, priority) => {
+          const newTodo = todoItem(name, description, dueDate, priority);
+          project.addTodo(newTodo);
+          storageManager.saveData(projects);
+          renderTodos(project.todoList, project, projects);
+        },
+        null,
+        todosContainer
+      );
+    });
+
+    todosContainer.appendChild(addTodoButton);
+
+    divContent.appendChild(todosContainer);
+  };
+
+  return {
+    renderProjectForm,
+    renderProjects,
+    renderTodoForm,
+    renderTodos,
+  };
 })();
