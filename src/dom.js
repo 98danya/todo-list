@@ -160,7 +160,15 @@ export const domController = (() => {
       divContent.appendChild(todosContainer);
     }
 
-    todosContainer.innerHTML = `<h2>${project.name} <br> <h3>${project.description}</h3></h2>`;
+    todosContainer.innerHTML = `
+      <div class="todo-header">
+        <h1>📎 ${project.name}</h1>
+        <h2>${project.description}</h2>
+      </div>
+    `;
+
+    const todoElementsContainer = document.createElement("div");
+    todoElementsContainer.classList.add("todo-elements-container");
 
     todos.forEach((todo) => {
       const todoElement = document.createElement("div");
@@ -202,12 +210,18 @@ export const domController = (() => {
           project
         );
       });
-
       todoElement.appendChild(editButton);
+
+      const checkboxContainer = document.createElement("div");
+      checkboxContainer.className = "checkbox-container";
 
       const deleteTodo = document.createElement("input");
       deleteTodo.type = "checkbox";
       deleteTodo.title = "Check to remove";
+
+      const label = document.createElement("label");
+      label.textContent = "Completed?";
+
       deleteTodo.addEventListener("change", () => {
         if (deleteTodo.checked) {
           const index = project.todoList.indexOf(todo);
@@ -216,18 +230,22 @@ export const domController = (() => {
           }
 
           storageManager.saveData(projects);
-
           renderTodos(project.todoList, project, projects);
         }
       });
 
-      todoElement.appendChild(deleteTodo);
+      checkboxContainer.appendChild(label);
+      checkboxContainer.appendChild(deleteTodo);
 
-      todosContainer.appendChild(todoElement);
+      todoElement.appendChild(checkboxContainer);
+
+      todoElementsContainer.appendChild(todoElement);
     });
 
+    todosContainer.appendChild(todoElementsContainer);
     const addTodoButton = document.createElement("button");
     addTodoButton.textContent = "Add Todo";
+    addTodoButton.className = "addTodoBtn";
     addTodoButton.addEventListener("click", () => {
       renderTodoForm(
         (name, description, dueDate, priority) => {
@@ -241,7 +259,6 @@ export const domController = (() => {
         project
       );
     });
-
     todosContainer.appendChild(addTodoButton);
 
     divContent.appendChild(todosContainer);
